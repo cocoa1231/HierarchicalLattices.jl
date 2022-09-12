@@ -2,10 +2,55 @@ module HierarchicalLattices
 
 using Graphs
 using MetaGraphs
+using RecipesBase
 
 export diamond_order_zero_transform!
 export make_diamond_lattice0
 export diamond_lattice
+
+@recipe function f(L::MetaGraph)
+    aspect_ratio := :equal
+    
+    for e in edges(L)
+        @series begin
+            seriestype := :path
+            label := false
+            linecolor --> :green
+            src_x, src_y = real(L.vprops[e.src][:loc]), imag(L.vprops[e.src][:loc])
+            dst_x, dst_y = real(L.vprops[e.dst][:loc]), imag(L.vprops[e.dst][:loc])
+            [src_x, dst_x], [src_y, dst_y]
+        end
+    end
+
+    @series begin
+        vx, vy = Float64[], Float64[]
+        seriestype := :scatter
+        label := false
+        color --> :blue
+        for v in vertices(L)
+            if L.vprops[v][:val] == +1
+                push!(vx, real(L.vprops[v][:loc]))
+                push!(vy, imag(L.vprops[v][:loc]))
+            end
+        end
+        vx, vy
+    end
+
+    @series begin
+        vx, vy = Float64[], Float64[]
+        seriestype := :scatter
+        label := false
+        color --> :black
+        for v in vertices(L)
+            if L.vprops[v][:val] == -1
+                push!(vx, real(L.vprops[v][:loc]))
+                push!(vy, imag(L.vprops[v][:loc]))
+            end
+        end
+        vx, vy
+    end
+    
+end
 
 function diamond_order_zero_transform!(lattice, edge; scale = √3/2)
     
