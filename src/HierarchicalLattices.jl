@@ -3,6 +3,10 @@ module HierarchicalLattices
 using Graphs
 using MetaGraphs
 
+export diamond_order_zero_transform!
+export make_diamond_lattice0
+export diamond_lattice
+
 function diamond_order_zero_transform!(lattice, edge; scale = √3/2)
     
     e = edge
