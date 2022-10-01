@@ -3,10 +3,22 @@ module HierarchicalLattices
 using Graphs
 using MetaGraphs
 using RecipesBase
+include("Metropolis.jl")
 
-export diamond_order_zero_transform!
-export make_diamond_lattice0
-export diamond_lattice
+
+# Diamond Lattice data
+export  diamond_order_zero_transform!,
+        make_diamond_lattice0,
+        diamond_lattice
+
+# Metropolis Stuff
+export  metropolis!,
+        energy,
+        ΔE,
+        magnetization
+
+# Main data structure
+export IsingData
 
 @recipe function f(L::MetaGraph)
     aspect_ratio := :equal
