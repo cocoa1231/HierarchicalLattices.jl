@@ -142,6 +142,8 @@ function generate_autocorr_data(lattice::IsingData, nsweeps; showprogress = fals
             next!(P)
         end
     end
+
+    return χ
 end
 
 end # module HierarchicalLattices
