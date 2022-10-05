@@ -56,7 +56,7 @@ function metropolis!(lattice::IsingData, steps::Integer, T::Float64; showprogres
         # Pick a random vertex
         v = rand(vlist)
         # Calculate energy for flipping the spin
-        dE = WIP.ΔE(L.final_state, v)
+        dE = ΔE(L.final_state, v)
         
         # If new energy is not lower, probablistically flip it
         u = rand()
@@ -70,8 +70,8 @@ function metropolis!(lattice::IsingData, steps::Integer, T::Float64; showprogres
             push!(lattice.spinflip_history, -1)
         end
         
-        push!(L.magnetization_history, WIP.magnetization(L))
-        push!(L.internalenergy_history, WIP.energy(L))
+        push!(L.magnetization_history, magnetization(L))
+        push!(L.internalenergy_history, energy(L))
         
         if showprogress
             next!(p)
