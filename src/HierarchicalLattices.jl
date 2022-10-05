@@ -8,15 +8,10 @@ include("Metropolis.jl")
 
 
 # Diamond Lattice data
-export  diamond_order_zero_transform!,
-        make_diamond_lattice0,
-        diamond_lattice
+export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice
 
 # Metropolis Stuff
-export  metropolis!,
-        energy,
-        ΔE,
-        magnetization
+export  metropolis!, energy, ΔE, magnetization
 
 # Main data structure
 export IsingData
