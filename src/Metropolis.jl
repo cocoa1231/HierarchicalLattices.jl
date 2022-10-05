@@ -2,7 +2,7 @@ export IsingData
 export magnetization
 export energy
 
-struct IsingData
+mutable struct IsingData
     generation::Integer
     initial_state::MetaGraph
     final_state::MetaGraph
