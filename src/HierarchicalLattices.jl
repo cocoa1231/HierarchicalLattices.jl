@@ -3,6 +3,7 @@ module HierarchicalLattices
 using Graphs
 using MetaGraphs
 using RecipesBase
+using ProgressMeter
 include("Metropolis.jl")
 
 
@@ -64,7 +65,7 @@ export IsingData
     
 end
 
-function diamond_order_zero_transform!(lattice, edge; scale = √3/2)
+function diamond_order_zero_transform!(lattice, edge; scale = 1)
     
     e = edge
     src = lattice.vprops[e.src][:loc]
@@ -113,6 +114,39 @@ function diamond_lattice(order::Integer)
     end
     
     return oz
+end
+
+function sum_autocorr(magnetization_history, t)
+    # t_max is the number of monte carlo steps we've taken in total
+    t_max = length(magnetization_history)
+    
+    # Magnetization history m, assuming I've run fill_magnetization_history! already on the lattice
+    m = magnetization_history
+    
+    # Normalization constant
+    norm = 1/(t_max - t)
+    
+    mean_m² = norm * sum(m[1:t_max-t]) * norm * sum(m[t+1:t_max])
+    
+    return norm * sum(m[1:t_max - t] .* m[t+1:t_max]) - mean_m²
+end
+
+function generate_autocorr_data(lattice::IsingData, nsweeps; showprogress = false)
+    N = length( vertices(lattice.initial_state) )
+    m = lattice.magnetization_history
+    t_max = flor(Int, nsweeps*N^2)
+
+    χ = zeros( ceil(Integer, t_max / N) )
+
+    if showprogress
+        P = Progress(length(χ))
+    end
+    Threads.@threads for t in eachindex(χ)
+        χ[t] = sum_autocorr(m, Int(t*N))
+        if showprogress
+            next!(P)
+        end
+    end
 end
 
 end # module HierarchicalLattices
