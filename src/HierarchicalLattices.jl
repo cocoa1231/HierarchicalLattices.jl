@@ -129,7 +129,7 @@ end
 function generate_autocorr_data(lattice::IsingData, nsweeps; showprogress = false)
     N = length( vertices(lattice.initial_state) )
     m = lattice.magnetization_history
-    t_max = floor(Int, nsweeps*N^2)
+    t_max = floor(Int, nsweeps*N)
 
     χ = zeros( ceil(Integer, t_max / N) )
 
