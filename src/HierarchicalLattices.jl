@@ -126,9 +126,8 @@ function sum_autocorr(magnetization_history, t)
     return norm * sum(m[1:t_max - t] .* m[t+1:t_max]) - mean_m²
 end
 
-function generate_autocorr_data(lattice::IsingData, nsweeps; showprogress = false)
-    N = length( vertices(lattice.initial_state) )
-    m = lattice.magnetization_history
+function generate_autocorr_data(array, N, nsweeps; showprogress = false)
+    m = array
     t_max = floor(Int, nsweeps*N)
 
     χ = zeros( ceil(Integer, t_max / N) )
