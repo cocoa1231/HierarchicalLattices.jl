@@ -111,6 +111,19 @@ function diamond_lattice(order::Integer)
     return oz
 end
 
+function diamond_ising_lattice(order::Integer, state::Symbol)
+    l = diamond_lattice(order)
+    if state == :zero
+        for v in vertices(l)
+            set_prop!(l, v, :val, 1)
+        end
+    elseif state == :infty
+        for v in vertices(l)
+            set_prop!(l, v, :val, rand([+1, -1]))
+        end
+    end
+end
+
 function sum_autocorr(magnetization_history, t)
     # t_max is the number of monte carlo steps we've taken in total
     t_max = length(magnetization_history)
