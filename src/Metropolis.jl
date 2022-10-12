@@ -57,7 +57,7 @@ function metropolis!(lattice::IsingData, steps::Integer, T::Float64; showprogres
     
     neighbours_dict = Dict{Int64, Vector{Int64}}()
     for v in vlist
-        N = neighbors(L.initial_state)
+        N = neighbors(L.initial_state, v)
         push!(neighbours_dict, v => N)
     end
 
