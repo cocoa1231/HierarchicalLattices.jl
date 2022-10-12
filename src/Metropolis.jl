@@ -40,7 +40,7 @@ function energy(L::MetaGraph; J = 1)
 end
 energy(L::IsingData; J = 1) = energy(L.final_state, J = J)
 
-function ΔE(L::MetaGraph, s::Integer, n::Vector{Integer}; J = 1)
+function ΔE(L::MetaGraph, s::Integer, n::Vector{<:Integer}; J = 1)
     si = [ L.vprops[i][:val] for i in n ]
     sk = L.vprops[s][:val]
     return 2J*sk*sum(si)
