@@ -13,6 +13,12 @@ end
 
 IsingData(L::MetaGraph, g::Integer) = IsingData(g, deepcopy(L), deepcopy(L), Float64[], Float64[], Int64[])
 
+function IsingData(L::MetaGraph)
+    nbonds = edges(L) |> collect |> length
+    g = Int(log(4, nbonds))
+    return IsingData(L, g)
+end
+
 function magnetization(I::IsingData; final_state = true)
     if final_state
         L = I.final_state
