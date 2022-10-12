@@ -122,6 +122,7 @@ function diamond_ising_lattice(order::Integer, state::Symbol)
             set_prop!(l, v, :val, rand([+1, -1]))
         end
     end
+    return l
 end
 
 function sum_autocorr(magnetization_history, t)
