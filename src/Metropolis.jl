@@ -83,8 +83,8 @@ function metropolis!(lattice::IsingData, steps::Integer, T::Float64; showprogres
             push!(lattice.spinflip_history, -1)
         end
         
-        push!(L.magnetization_history, magnetization(L))
-        push!(L.internalenergy_history, energy(L))
+        # push!(L.magnetization_history, magnetization(L))
+        # push!(L.internalenergy_history, energy(L))
         
         if showprogress
             next!(p)
