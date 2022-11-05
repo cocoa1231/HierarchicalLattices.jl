@@ -19,12 +19,7 @@ function IsingData(L::MetaGraph)
     return IsingData(L, g)
 end
 
-function magnetization(I::IsingData; final_state = true)
-    if final_state
-        L = I.final_state
-    else
-        L = I.initial_state
-    end
+function magnetization(L::MetaGraph)
     N = vertices(L) |> length
     M = sum([L.vprops[v][:val] for v in vertices(L)])
     
