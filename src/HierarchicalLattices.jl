@@ -8,10 +8,10 @@ include("Metropolis.jl")
 
 
 # Diamond Lattice data
-export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice
+export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice, diamond_ising_lattice
 
 # Metropolis Stuff
-export  metropolis!, energy, ΔE, magnetization
+export  metropolis!, energy, ΔE, magnetization, fill_data!
 
 # Main data structure
 export IsingData
@@ -157,6 +157,54 @@ function generate_autocorr_data(array, N, nsweeps; showprogress = false)
     end
 
     return χ
+end
+
+function _fill_U_history!(lattice::IsingData; J = 1)
+    l = deepcopy(lattice.initial_state)
+    
+    lattice.internalenergy_history = Float64[energy(l)]
+    for s_k in lattice.spinflip_history
+        if s_k == -1
+            push!(lattice.internalenergy_history, lattice.internalenergy_history[end])
+        else
+            # Calculate new E
+            push!(lattice.internalenergy_history, lattice.internalenergy_history[end] + ΔE(l, s_k, neighbors(l, s_k), J = J))
+            
+            # Update spin for next calculation
+            l.vprops[s_k][:val] *= -1
+        end
+    end
+end
+
+function _fill_M_history!(lattice::IsingData)
+    l = deepcopy(lattice.initial_state)
+    
+    lattice.magnetization_history = Float64[magnetization(l)]
+    for s_k in lattice.spinflip_history
+        if s_k == -1
+            push!(lattice.magnetization_history, lattice.magnetization_history[end])
+        else
+            # Update lattice for next calculation
+            l.vprops[s_k][:val] *= -1
+            
+            # Calculate change in magnetization then
+            push!(lattice.magnetization_history, lattice.magnetization_history[end] + 2*l.vprops[s_k][:val])
+        end
+    end
+end
+
+"""
+    Fill the internal energy or magnetization history of a lattice evolved using the
+    `HierarchicalLattices.metropolis!` function.
+"""
+function fill_data!(lattice, data::Symbol)
+    if data == :M
+        return _fill_M_history!(lattice)
+    elseif data == :U
+        return _fill_U_history!(lattice)
+    else
+        throw(ArgumentError("Data parameter $(string(data)) not implimented!"))
+    end
 end
 
 end # module HierarchicalLattices
