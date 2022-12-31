@@ -24,9 +24,9 @@ export IsingData
             seriestype := :path
             label := false
             linecolor --> :black
-            if L.vprops[e.src][:val]*L.vprops[e.dst][:val] == 1
+            if e.src[:val]*e.dst[:val] == 1
                 linecolor --> :green
-            elseif L.vprops[e.src][:val]*L.vprops[e.dst][:val] == -1
+            elseif e.src[:val]*e.dst[:val] == -1
                 linecolor --> :red
             end
             src_x, src_y = real(L.vprops[e.src][:loc]), imag(L.vprops[e.src][:loc])
