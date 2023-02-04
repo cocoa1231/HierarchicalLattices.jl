@@ -4,7 +4,8 @@ using Graphs
 using MetaGraphs
 using RecipesBase
 using ProgressMeter
-include("Metropolis.jl")
+include("DiamondLattices/Lattice.jl")
+include("DiamondLattices/Metropolis.jl")
 
 
 # Diamond Lattice data
@@ -14,7 +15,7 @@ export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice, d
 export  metropolis!, energy, ΔE, magnetization, fill_data!
 
 # Main data structure
-export IsingData
+export IsingData, DiamondLattice
 
 @recipe function f(L::MetaGraph)
     aspect_ratio := :equal
@@ -60,70 +61,7 @@ export IsingData
     
 end
 
-function diamond_order_zero_transform!(lattice, edge; scale = 1)
-    
-    e = edge
-    src = lattice.vprops[e.src][:loc]
-    dst = lattice.vprops[e.dst][:loc]
-
-    Δz = dst - src
-    new_left  = (Δz * 1im) *  scale
-    new_right = (Δz * -1im) * scale
-    disp = src + Δz/2
-    new_pts = [new_left, new_right]
-    add_vertices!(lattice, 2)
-    for (idx, new_addition) in enumerate(vertices(lattice)[end-1:end])
-        set_props!(lattice, new_addition, Dict(
-                :loc => new_pts[idx] + disp,
-                :val => false
-            ))
-        add_edge!(lattice, e.src, new_addition)
-        add_edge!(lattice, new_addition, e.dst)
-    end
-
-    rem_edge!(lattice, e) 
-
-end
-
-function make_diamond_lattice0()
-    order_zero = SimpleDiGraph(2, 1) |> MetaGraph
-    locations = [ 0. + 1im, 0. - 1im ]
-    values = [false, false]
-    for (idx, vertex) in enumerate(vertices(order_zero))
-
-        set_props!(order_zero, vertex, Dict(
-                :loc => locations[idx],
-                :val => values[idx]
-            ))
-    end
-    return order_zero
-end
-
-function diamond_lattice(order::Integer)
-    oz = make_diamond_lattice0()
-    
-    for i in 1:order
-        for e in collect(edges(oz))
-            diamond_order_zero_transform!(oz, e; scale = 0.5^i)
-        end
-    end
-    
-    return oz
-end
-
-function diamond_ising_lattice(order::Integer, state::Symbol)
-    l = diamond_lattice(order)
-    if state == :zero
-        for v in vertices(l)
-            set_prop!(l, v, :val, 1)
-        end
-    elseif state == :infty
-        for v in vertices(l)
-            set_prop!(l, v, :val, rand([+1, -1]))
-        end
-    end
-    return l
-end
+include("DiamondLattices/Lattice.jl")
 
 function sum_autocorr(magnetization_history, t)
     # t_max is the number of monte carlo steps we've taken in total
@@ -159,16 +97,17 @@ function generate_autocorr_data(array, N, nsweeps; showprogress = false)
     return χ
 end
 
-function _fill_U_history!(lattice::IsingData; J = 1, showprogress = false)
+function _fill_U_history!(data::IsingData; J = 1, showprogress = false)
+    lattice = data.lattice
     l = deepcopy(lattice.initial_state)
-    P = Progress(length(lattice.spinflip_history), desc = "Filling Internal Energy History...")
-    lattice.internalenergy_history = Float64[energy(l)]
-    for s_k in lattice.spinflip_history
+    P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...")
+    data.internalenergy_history = Float64[energy(l)]
+    for s_k in data.spinflip_history
         if s_k == -1
-            push!(lattice.internalenergy_history, lattice.internalenergy_history[end])
+            push!(data.internalenergy_history, data.internalenergy_history[end])
         else
             # Calculate new E
-            push!(lattice.internalenergy_history, lattice.internalenergy_history[end] + ΔE(l, s_k, neighbors(l, s_k), J = J))
+            push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(l, s_k, neighbors(l, s_k), J = J))
             
             # Update spin for next calculation
             l.vprops[s_k][:val] *= -1
@@ -180,19 +119,20 @@ function _fill_U_history!(lattice::IsingData; J = 1, showprogress = false)
     end
 end
 
-function _fill_M_history!(lattice::IsingData; showprogress = false)
+function _fill_M_history!(data::IsingData; showprogress = false)
+    lattice = data.lattice
     l = deepcopy(lattice.initial_state)
-    P = Progress(length(lattice.spinflip_history), desc = "Filling Magnetization History...")
-    lattice.magnetization_history = Float64[magnetization(l)]
-    for s_k in lattice.spinflip_history
+    P = Progress(length(data.spinflip_history), desc = "Filling Magnetization History...")
+    data.magnetization_history = Float64[magnetization(l)]
+    for s_k in data.spinflip_history
         if s_k == -1
-            push!(lattice.magnetization_history, lattice.magnetization_history[end])
+            push!(data.magnetization_history, data.magnetization_history[end])
         else
             # Update lattice for next calculation
             l.vprops[s_k][:val] *= -1
             
             # Calculate change in magnetization then
-            push!(lattice.magnetization_history, lattice.magnetization_history[end] + 2*l.vprops[s_k][:val])
+            push!(data.magnetization_history, data.magnetization_history[end] + 2*l.vprops[s_k][:val])
         end
 
         if showprogress
