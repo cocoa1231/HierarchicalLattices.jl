@@ -6,7 +6,7 @@ using RecipesBase
 using ProgressMeter
 include("DiamondLattices/Lattice.jl")
 include("DiamondLattices/Metropolis.jl")
-
+include("DiamondLattices/StackedLattice.jl")
 
 # Diamond Lattice data
 export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice, diamond_ising_lattice
@@ -15,7 +15,7 @@ export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice, d
 export  metropolis!, energy, ΔE, magnetization, fill_data!
 
 # Main data structure
-export IsingData, DiamondLattice
+export IsingData, DiamondLattice, StackedDiamondLattice
 
 @recipe function f(L::MetaGraph)
     aspect_ratio := :equal

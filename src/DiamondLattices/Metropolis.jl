@@ -18,7 +18,6 @@ function IsingData(D::DiamondLattice)
 end
 
 function magnetization(L::MetaGraph)
-    N = vertices(L) |> length
     M = sum([L.vprops[v][:val] for v in vertices(L)])
     
     return M
