@@ -4,17 +4,23 @@ using Graphs
 using MetaGraphs
 using RecipesBase
 using ProgressMeter
+
+# Diamond Lattices
 include("DiamondLattices/Lattice.jl")
-include("DiamondLattices/Metropolis.jl")
 include("DiamondLattices/StackedLattice.jl")
+include("DiamondLattices/Metropolis.jl")
 
 # Diamond Lattice data
-export  diamond_order_zero_transform!, make_diamond_lattice0, diamond_lattice, diamond_ising_lattice
+export  diamond_order_zero_transform!,
+    make_diamond_lattice0,
+    diamond_lattice,
+    diamond_ising_lattice,
+    numberofspins
 
 # Metropolis Stuff
 export  metropolis!, energy, ΔE, magnetization, fill_data!
 
-# Main data structure
+# Main data structures
 export IsingData, DiamondLattice, StackedDiamondLattice
 
 @recipe function f(L::MetaGraph)
@@ -61,8 +67,6 @@ export IsingData, DiamondLattice, StackedDiamondLattice
     
 end
 
-include("DiamondLattices/Lattice.jl")
-
 function sum_autocorr(magnetization_history, t)
     # t_max is the number of monte carlo steps we've taken in total
     t_max = length(magnetization_history)
@@ -95,64 +99,6 @@ function generate_autocorr_data(array, N, nsweeps; showprogress = false)
     end
 
     return χ
-end
-
-function _fill_U_history!(data::IsingData; J = 1, showprogress = false)
-    lattice = data.lattice
-    l = deepcopy(lattice.initial_state)
-    P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...")
-    data.internalenergy_history = Float64[energy(l)]
-    for s_k in data.spinflip_history
-        if s_k == -1
-            push!(data.internalenergy_history, data.internalenergy_history[end])
-        else
-            # Calculate new E
-            push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(l, s_k, neighbors(l, s_k), J = J))
-            
-            # Update spin for next calculation
-            l.vprops[s_k][:val] *= -1
-        end
-
-        if showprogress
-            next!(P)
-        end
-    end
-end
-
-function _fill_M_history!(data::IsingData; showprogress = false)
-    lattice = data.lattice
-    l = deepcopy(lattice.initial_state)
-    P = Progress(length(data.spinflip_history), desc = "Filling Magnetization History...")
-    data.magnetization_history = Float64[magnetization(l)]
-    for s_k in data.spinflip_history
-        if s_k == -1
-            push!(data.magnetization_history, data.magnetization_history[end])
-        else
-            # Update lattice for next calculation
-            l.vprops[s_k][:val] *= -1
-            
-            # Calculate change in magnetization then
-            push!(data.magnetization_history, data.magnetization_history[end] + 2*l.vprops[s_k][:val])
-        end
-
-        if showprogress
-            next!(P)
-        end
-    end
-end
-
-"""
-    Fill the internal energy or magnetization history of a lattice evolved using the
-    `HierarchicalLattices.metropolis!` function.
-"""
-function fill_data!(lattice, data::Symbol; showprogress = false)
-    if data == :M
-        return _fill_M_history!(lattice, showprogress = showprogress)
-    elseif data == :U
-        return _fill_U_history!(lattice, showprogress = showprogress)
-    else
-        throw(ArgumentError("Data parameter $(string(data)) not implimented!"))
-    end
 end
 
 end # module HierarchicalLattices

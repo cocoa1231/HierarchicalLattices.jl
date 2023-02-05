@@ -83,3 +83,69 @@ function diamond_ising_lattice(order::Integer, state::Symbol)
     end
     return l
 end
+
+function magnetization(lattice::DiamondLattice; state = :final)
+    L = getproperty(lattice, Symbol(string(state)*"_state"))
+    M = sum([L.vprops[v][:val] for v in vertices(L)])
+    return M
+end
+
+function energy(lattice::DiamondLattice; state = :final)
+    L = getproperty(lattice, Symbol(string(state)*"_state"))
+    E = 0
+    for e in edges(L)
+        E += L.vprops[e.src][:val]*L.vprops[e.dst][:val]
+    end
+    return -E
+end
+
+function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; J = 1, state = :final)
+    L = getproperty(lattice, Symbol(string(state)*"_state"))
+    si = [ L.vprops[i][:val] for i in n ]
+    sk = L.vprops[s][:val]
+    return 2J*sk*sum(si)
+end
+
+function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false)
+    lattice = DiamondLattice(data.lattice.initial_state, data.lattice.generation)
+    P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...")
+
+    data.internalenergy_history = Float64[energy(lattice)]
+    for s_k in data.spinflip_history
+        if s_k == -1
+            push!(data.internalenergy_history, data.internalenergy_history[end])
+        else
+            # Calculate new E
+            push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(lattice, s_k, neighbors(lattice.final_state, s_k), J = J))
+            
+            # Update spin for next calculation
+            lattice.final_state.vprops[s_k][:val] *= -1
+        end
+
+        if showprogress
+            next!(P)
+        end
+    end
+end
+
+function _fill_M_history!(::DiamondLattice, data; showprogress = false)
+    lattice = DiamondLattice(data.lattice.initial_state, data.lattice.generation)
+    P = Progress(length(data.spinflip_history), desc = "Filling Magnetization History...")
+
+    data.magnetization_history = Float64[magnetization(lattice)]
+    for s_k in data.spinflip_history
+        if s_k == -1
+            push!(data.magnetization_history, data.magnetization_history[end])
+        else
+            # Update lattice for next calculation
+            lattice.final_state.vprops[s_k][:val] *= -1
+            
+            # Calculate change in magnetization then
+            push!(data.magnetization_history, data.magnetization_history[end] + 2*lattice.final_state.vprops[s_k][:val])
+        end
+
+        if showprogress
+            next!(P)
+        end
+    end
+end
