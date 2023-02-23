@@ -63,44 +63,34 @@ function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float
 end
 
 function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false)
-    p     = Progress(steps)
-    vlist = vertices(data.lattice.final_state[1].final_state)
-    β     = 1/T
-    L     = data.lattice
-    depth = length(L.final_state)
-    K     = data.lattice.coupling
-
-    # Store possible exponential values
-    z_max = 4^L.final_state[1].generation
+    lattice = data.lattice
+    P = Progress(steps)
+    β = 1/T
+    K = 2
+    z_max = 4^lattice.generation
+    viter = vertices(lattice.final_state)
+    exponential = Dict( [-2*(z_max-K):2:2*(z_max+K);] .=> exp.(-β .* [-2*(z_max-K):2:2*(z_max+K);]) )
     
-    # Store a map of neighbors of each vertex
-    neighbours_dict = L.adjacentspins
-    
-    # dE => exp(-β*dE)
-    exponential = Dict( [-2*(z_max-K):2:2*(z_max+K);] .=> exp.(-β .* [-2*(z_max-K):2:2*(z_max+K);] ) )
-
     for _ in Base.OneTo(steps)
         # Pick a random vertex
-        v = rand(vlist)
-        l = rand(1:depth)
-
-        # Calculate energy for flipping the spin
-        dE = ΔE(L, [l, v], neighbours_dict[v])
+        v = rand(viter)
         
-        # If new energy is not lower, probablistically flip it
-        u = rand()
+        # Calculate dE
+        dE = ΔE(lattice, v)
+        
+        # If new energy is not lower, flip it with probability exp(-βΔE)
         if dE < 0
-            L.final_state[l].final_state.vprops[v][:val] *= -1
-            push!(data.spinflip_history, (l, v))
-        elseif (u < exponential[Integer(dE)])
-            L.final_state[l].final_state.vprops[v][:val] *= -1
-            push!(data.spinflip_history, (l, v))
+            lattice.final_state.vprops[v][:val] *= -1
+            push!(data.spinflip_history, v)
+        elseif rand() < exponential[Integer(dE)]
+            lattice.final_state.vprops[v][:val] *= -1
+            push!(data.spinflip_history, v)
         else
-            push!(data.spinflip_history, (-1, -1))
+            push!(data.spinflip_history, -1)
         end
         
         if showprogress
-            next!(p)
+            next!(P)
         end
     end
 end
