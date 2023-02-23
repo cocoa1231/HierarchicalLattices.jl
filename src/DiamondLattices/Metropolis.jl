@@ -69,7 +69,7 @@ function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T
     K = 2
     z_max = 4^lattice.generation
     viter = vertices(lattice.final_state)
-    exponential = Dict( [-2*(z_max-K):2:2*(z_max+K);] .=> exp.(-β .* [-2*(z_max-K):2:2*(z_max+K);]) )
+    exponential = Dict{Any, Any}( [-2*(z_max-K):2:2*(z_max+K);] .=> exp.(-β .* [-2*(z_max-K):2:2*(z_max+K);]) )
     
     for _ in Base.OneTo(steps)
         # Pick a random vertex
@@ -77,12 +77,15 @@ function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T
         
         # Calculate dE
         dE = ΔE(lattice, v)
-        
+        if !(dE in keys(exponential))
+            push!(exponential, dE => exp(-β*dE))
+        end
+
         # If new energy is not lower, flip it with probability exp(-βΔE)
         if dE < 0
             lattice.final_state.vprops[v][:val] *= -1
             push!(data.spinflip_history, v)
-        elseif rand() < exponential[Integer(dE)]
+        elseif rand() < exponential[dE]
             lattice.final_state.vprops[v][:val] *= -1
             push!(data.spinflip_history, v)
         else
