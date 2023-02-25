@@ -252,7 +252,7 @@ function _fill_M_history!(::StackedDiamondLattice, data; showprogress = false)
             lattice.final_state.vprops[s_k][:val] *= -1
 
             # Calculate change in magnetization
-            push!(data.magnetization_history, data.magnetization_history[end] + lattice.final_state.vprops[s_k][:val])
+            push!(data.magnetization_history, data.magnetization_history[end] + 2*lattice.final_state.vprops[s_k][:val])
         end
 
         if showprogress
