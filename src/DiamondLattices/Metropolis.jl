@@ -99,7 +99,7 @@ function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T
         end
     end
 
-    append!(ID.spinflip_history, spinsflipped)
+    append!(data.spinflip_history, spinsflipped)
 end
 
 """
