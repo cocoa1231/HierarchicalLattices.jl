@@ -6,12 +6,6 @@ mutable struct IsingData
 end
 
 IsingData(D::DiamondLattice) = IsingData(D, Float64[], Float64[], Int64[])
-function IsingData(D::DiamondLattice)
-    nbonds = edges(D.final_state) |> collect |> length
-    g = Int(log(4, nbonds))
-    return IsingData(D)
-end
-
 
 function metropolis!(data::IsingData, steps::Integer, T::Float64; showprogress = false)
     metropolis!(data.lattice, data, steps, T; showprogress = showprogress)

@@ -222,7 +222,7 @@ function energy(l::StackedDiamondLattice; state = :final_state)
     return total
 end
 
-function nnsum(f::T, vlist)
+function nnsum(f::T, vlist) where T <: AbstractMetaGraph
     total = 0
     for v in vlist
         total += f.vprops[v][:val]
