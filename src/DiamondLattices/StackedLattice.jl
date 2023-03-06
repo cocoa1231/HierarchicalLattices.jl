@@ -222,12 +222,20 @@ function energy(l::StackedDiamondLattice; state = :final_state)
     return total
 end
 
+function nnsum(f::T, vlist)
+    total = 0
+    for v in vlist
+        total += f.vprops[v][:val]
+    end
+    return total
+end
+
 function ΔE(l::StackedDiamondLattice, sk; state = :final_state)
     f = getproperty(l, state)
     total = 0
     spink = f.vprops[sk][:val]
     for (w, nnspins) in l.edgeweightmap[sk]
-        total += 2*w*spink*sum([f.vprops[si][:val] for si in nnspins])
+        total += 2*w*spink*nnsum(f, nnspins)
     end
     return total
 end
@@ -252,7 +260,7 @@ function _fill_M_history!(::StackedDiamondLattice, data; showprogress = false)
             lattice.final_state.vprops[s_k][:val] *= -1
 
             # Calculate change in magnetization
-            push!(data.magnetization_history, data.magnetization_history[end] + 2*lattice.final_state.vprops[s_k][:val])
+            push!(data.magnetization_history, data.magnetization_history[end] + 2*xlattice.final_state.vprops[s_k][:val])
         end
 
         if showprogress
