@@ -166,7 +166,7 @@ end
 
 function enumerate_edgeweights(f::T, v) where T <: AbstractMetaGraph
     connected_edges = enumerate_edges(f, v)
-    weightmap = Dict{Number, Vector{Int64}}()
+    weightmap = Dict{Int64, Vector{Int64}}()
     
     for e in connected_edges
         if v == e.src
