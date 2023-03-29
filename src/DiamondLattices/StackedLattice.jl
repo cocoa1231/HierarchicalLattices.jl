@@ -283,9 +283,8 @@ function _fill_U_history!(::StackedDiamondLattice, data; showprogress = false)
             push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(lattice, s_k))
             lattice.final_state.vprops[s_k][:val] *= -1
         end
-    end
-
-    if showprogress
+        if showprogress
         next!(P)
+    end
     end
 end
