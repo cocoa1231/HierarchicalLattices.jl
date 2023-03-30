@@ -210,16 +210,7 @@ end
 function energy(l::StackedDiamondLattice; state = :final_state)
     f = getproperty(l, state)
 
-    total = 0
-    for e in edges(f)
-        if e in keys(f.eprops)
-            weight = f.eprops[e][:weight]
-        else
-            weight = f.defaultweight
-        end
-        total += -weight * f.vprops[e.src][:val]*f.vprops[e.dst][:val]
-    end
-    return total
+    return sum( (e -> -get_prop(f, e, :weight)*get_prop(f, e.src, :val)*get_prop(f, e.dst, :val)).(edges(f)) )
 end
 
 function nnsum(f::T, vlist) where T <: AbstractMetaGraph
