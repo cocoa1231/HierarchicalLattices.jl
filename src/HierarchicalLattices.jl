@@ -9,6 +9,7 @@ using ProgressMeter
 include("DiamondLattices/Lattice.jl")
 include("DiamondLattices/StackedLattice.jl")
 include("DiamondLattices/Metropolis.jl")
+include("DiamondLattices/Cluster.jl")
 
 # Diamond Lattice data
 export  diamond_order_zero_transform!,
@@ -17,11 +18,12 @@ export  diamond_order_zero_transform!,
     diamond_ising_lattice,
     numberofspins
 
-# Metropolis Stuff
+# MCMC Stuff
 export  metropolis!, energy, ΔE, magnetization, fill_data!
+export wolffstep!, wolff!
 
 # Main data structures
-export IsingData, DiamondLattice, StackedDiamondLattice
+export IsingData, WolffData, DiamondLattice, StackedDiamondLattice
 
 @recipe function f(L::MetaGraph)
     aspect_ratio := :equal

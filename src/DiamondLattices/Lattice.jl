@@ -91,12 +91,9 @@ function magnetization(lattice::DiamondLattice; state = :final)
 end
 
 function energy(lattice::DiamondLattice; state = :final)
-    L = getproperty(lattice, Symbol(string(state)*"_state"))
-    E = 0
-    for e in edges(L)
-        E += L.vprops[e.src][:val]*L.vprops[e.dst][:val]
-    end
-    return -E
+    f = getproperty(lattice, Symbol(string(state)*"_state"))
+    
+    return sum( (e -> -get_prop(f, e.src, :val)*get_prop(f, e.dst, :val)).(edges(f)) )
 end
 
 function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; J = 1, state = :final)
