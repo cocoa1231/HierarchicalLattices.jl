@@ -12,7 +12,7 @@ function metropolis!(data::IsingData, steps::Integer, T::Float64; showprogress =
 end
 
 function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false)
-    p     = Progress(steps)
+    p     = Progress(steps, enabled = showprogress, showspeed = true)
     lattice = data.lattice
     vlist = vertices(lattice.final_state)
     β     = 1/T
@@ -50,15 +50,13 @@ function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float
         end
 
         
-        if showprogress
-            next!(p)
-        end
+        next!(p)
     end
 end
 
 function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false)
     lattice = data.lattice
-    P = Progress(steps)
+    P = Progress(steps, enabled = showprogress, showspeed = true)
     β = 1/T
     K = 2
     z_max = 4^lattice.generation
@@ -88,9 +86,7 @@ function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T
             spinsflipped[idx] = -1
         end
         
-        if showprogress
-            next!(P)
-        end
+        next!(P)
     end
 
     append!(data.spinflip_history, spinsflipped)
