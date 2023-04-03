@@ -7,12 +7,12 @@ end
 
 IsingData(D::DiamondLattice) = IsingData(D, Float64[], Float64[], Int64[])
 
-function metropolis!(data::IsingData, steps::Integer, T::Float64; showprogress = false)
-    metropolis!(data.lattice, data, steps, T; showprogress = showprogress)
+function metropolis!(data::IsingData, steps::Integer, T::Float64; showprogress = false, progressoutput = stdout)
+    metropolis!(data.lattice, data, steps, T; showprogress = showprogress, progressoutput = progressoutput)
 end
 
-function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false)
-    p     = Progress(steps, enabled = showprogress, showspeed = true)
+function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false, progressoutput = stdout)
+    p     = Progress(steps, enabled = showprogress, showspeed = true, output = progressoutput)
     lattice = data.lattice
     vlist = vertices(lattice.final_state)
     β     = 1/T
@@ -54,9 +54,9 @@ function metropolis!(::DiamondLattice, data::IsingData, steps::Integer, T::Float
     end
 end
 
-function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false)
+function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T::Float64; showprogress = false, progressoutput = stdout)
     lattice = data.lattice
-    P = Progress(steps, enabled = showprogress, showspeed = true)
+    P = Progress(steps, enabled = showprogress, showspeed = true, output = progressoutput)
     β = 1/T
     K = 2
     z_max = 4^lattice.generation
@@ -96,11 +96,11 @@ end
     Fill the internal energy or magnetization history of a lattice evolved using the
     `HierarchicalLattices.metropolis!` function.
 """
-function fill_data!(data::IsingData, variable::Symbol; showprogress = false)
+function fill_data!(data::IsingData, variable::Symbol; showprogress = false, progressoutput = stdout)
     if variable == :M
-        return _fill_M_history!(data.lattice, data, showprogress = showprogress)
+        return _fill_M_history!(data.lattice, data, showprogress = showprogress, progressoutput = progressoutput)
     elseif variable == :U
-        return _fill_U_history!(data.lattice, data, showprogress = showprogress)
+        return _fill_U_history!(data.lattice, data, showprogress = showprogress, progressoutput = progressoutput)
     else
         throw(ArgumentError("Data parameter $(string(data)) not implimented!"))
     end

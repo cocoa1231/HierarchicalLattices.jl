@@ -103,9 +103,9 @@ function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; J = 1, s
     return 2J*sk*sum(si)
 end
 
-function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false)
+function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false, progressoutput = stdout)
     lattice = DiamondLattice(data.lattice.initial_state, data.lattice.generation)
-    P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...")
+    P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...", output = progressoutput)
 
     data.internalenergy_history = Float64[energy(lattice)]
     for s_k in data.spinflip_history
@@ -125,9 +125,9 @@ function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false)
     end
 end
 
-function _fill_M_history!(::DiamondLattice, data; showprogress = false)
+function _fill_M_history!(::DiamondLattice, data; showprogress = false, progressoutput = stdout)
     lattice = DiamondLattice(data.lattice.initial_state, data.lattice.generation)
-    P = Progress(length(data.spinflip_history), desc = "Filling Magnetization History...")
+    P = Progress(length(data.spinflip_history), desc = "Filling Magnetization History...", output = progressoutput)
 
     data.magnetization_history = Float64[magnetization(lattice)]
     for s_k in data.spinflip_history

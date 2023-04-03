@@ -82,7 +82,7 @@ function wolffstep!(lattice::StackedDiamondLattice, probdict::Dictionary{Float64
     return cluster, spinsflipped
 end
 
-function wolff!(WD::WolffData{L}, nsteps, T; showprogress = false, verbose = false) where L
+function wolff!(WD::WolffData{L}, nsteps, T; showprogress = false, verbose = false, progressoutput = stdout) where L
     β = 1/T
 
     if L == DiamondLattice
@@ -99,7 +99,7 @@ function wolff!(WD::WolffData{L}, nsteps, T; showprogress = false, verbose = fal
         vertices(WD.lattice.final_state) .=>  (x -> neighbors(WD.lattice.final_state, x)).(vertices(WD.lattice.final_state))
     ))
 
-    Pthermalize = Progress(WD.thermalization_steps, enabled = showprogress, showspeed = true)
+    Pthermalize = Progress(WD.thermalization_steps, enabled = showprogress, showspeed = true, output = progressoutput)
     if verbose
         @info "Thermalizing system for $(WD.thermalization_steps) steps."
     end
@@ -114,7 +114,7 @@ function wolff!(WD::WolffData{L}, nsteps, T; showprogress = false, verbose = fal
         @info "Save interval = $(WD.saveinterval) steps."
     end
 
-    Ptrial = Progress(nsteps, enabled = showprogress, showspeed = true)
+    Ptrial = Progress(nsteps, enabled = showprogress, showspeed = true, output = progressoutput)
     energies = zeros(floor(Int64, nsteps / WD.saveinterval))
     magnetizations = zeros(floor(Int64, nsteps / WD.saveinterval))
     for i in 1:nsteps
