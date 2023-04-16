@@ -2,9 +2,11 @@ mutable struct DiamondLattice
     generation
     initial_state
     final_state
+    interaction_weight
 end
 
-DiamondLattice(G::MetaGraph, order::Integer) = DiamondLattice(order, deepcopy(G), deepcopy(G))
+DiamondLattice(G::MetaGraph, order::Integer) = DiamondLattice(order, deepcopy(G), deepcopy(G), G.defaultweight)
+DiamondLattice(G::MetaGraph, order::Integer, latticeweight::Number) = DiamondLattice(order, deepcopy(G), deepcopy(G), latticeweight)
 
 """
     Takes a lattice graph and an edge and applies b = 2 diamond transform
@@ -93,11 +95,12 @@ end
 function energy(lattice::DiamondLattice; state = :final)
     f = getproperty(lattice, Symbol(string(state)*"_state"))
     
-    return sum( (e -> -get_prop(f, e.src, :val)*get_prop(f, e.dst, :val)).(edges(f)) )
+    return sum( (e -> -lattice.interaction_weight*get_prop(f, e.src, :val)*get_prop(f, e.dst, :val)).(edges(f)) )
 end
 
-function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; J = 1, state = :final)
+function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; state = :final)
     L = getproperty(lattice, Symbol(string(state)*"_state"))
+    J = lattice.interaction_weight
     si = [ L.vprops[i][:val] for i in n ]
     sk = L.vprops[s][:val]
     return 2J*sk*sum(si)
