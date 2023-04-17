@@ -106,7 +106,7 @@ function ΔE(lattice::DiamondLattice, s::Integer, n::Vector{<:Integer}; state = 
     return 2J*sk*sum(si)
 end
 
-function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false, progressoutput = stdout)
+function _fill_U_history!(::DiamondLattice, data; showprogress = false, progressoutput = stdout)
     lattice = DiamondLattice(data.lattice.initial_state, data.lattice.generation)
     P = Progress(length(data.spinflip_history), desc = "Filling Internal Energy History...", output = progressoutput)
 
@@ -116,7 +116,7 @@ function _fill_U_history!(::DiamondLattice, data; J = 1, showprogress = false, p
             push!(data.internalenergy_history, data.internalenergy_history[end])
         else
             # Calculate new E
-            push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(lattice, s_k, neighbors(lattice.final_state, s_k), J = J))
+            push!(data.internalenergy_history, data.internalenergy_history[end] + ΔE(lattice, s_k, neighbors(lattice.final_state, s_k)))
             
             # Update spin for next calculation
             lattice.final_state.vprops[s_k][:val] *= -1
