@@ -94,7 +94,6 @@ function transform_edge_diamond!(lattice, edge, b)
     e = edge
     add_vertices!(lattice, b)
     for new_addition in vertices(lattice)[end-b+1:end]
-        set_prop!(lattice, new_addition, :val, false)
         add_edge!(lattice, e.src, new_addition)
         add_edge!(lattice, new_addition, e.dst)
     end
@@ -107,10 +106,6 @@ end
 """
 function order_zero_diamond_lattice()
     order_zero = SimpleGraph(2, 1) |> MetaGraph
-    values = [false, false]
-    for (idx, vertex) in enumerate(vertices(order_zero))
-        set_prop!(order_zero, vertex, :val, values[idx])
-    end
     return order_zero
 end
 
@@ -132,11 +127,9 @@ end
 function diamond_lattice(order::Int64, b::Int64; showprogress = false)
     oz = order_zero_diamond_lattice()
     
-    for i in 1:order
-        @info "Generated order = $i"
+    for _ in 1:order
         raise_order_diamond!(oz, b; showprogress = showprogress)
-    end
-    
+    end 
     return oz
 end
 
