@@ -112,12 +112,13 @@ end
 """
     Raise order of diamond lattice
 """
-function raise_order_diamond!(lattice, b; showprogress = false)
+function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.2)
     elist = collect(edges(lattice))
     P = Progress(length(elist), enabled = showprogress)
     for e in elist
         transform_edge_diamond!(lattice, e, b)
         next!(P)
+        rand() < gc_freq && GC.gc()
     end
 end
 
