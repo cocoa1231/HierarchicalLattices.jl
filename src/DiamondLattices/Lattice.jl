@@ -125,11 +125,11 @@ end
 """
     Generates an arbitrary order diamond lattice
 """
-function diamond_lattice(order::Int64, b::Int64; showprogress = false)
+function diamond_lattice(order::Int64, b::Int64; showprogress = false, gc_freq = 0.)
     oz = order_zero_diamond_lattice()
     
     for _ in 1:order
-        raise_order_diamond!(oz, b; showprogress = showprogress)
+        raise_order_diamond!(oz, b; showprogress = showprogress, gc_freq = gc_freq)
     end 
     return oz
 end
