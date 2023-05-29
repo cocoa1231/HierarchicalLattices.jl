@@ -83,7 +83,7 @@ end
 """
 Generates an arbitrary order diamond lattice with b = 2. Thus function will
 calculate the location of every spin. The location of every new spin will be
-scaled by $0.5^o$ where $o$ is the order of the spin. Inputs:
+scaled by `0.5^o` where `o` is the order of the spin. Inputs:
     - order::Integer: Order of the lattice to generate
 """
 function diamond_lattice(order::Integer)
