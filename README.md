@@ -2,7 +2,7 @@
 
 This library provides several functions to generate hierarchical lattices
 [(Griffiths,
-Kaufman)])(<https://journals.aps.org/prb/abstract/10.1103/PhysRevB.26.5022>).
+Kaufman)](<https://journals.aps.org/prb/abstract/10.1103/PhysRevB.26.5022>).
 The primary idea to do this is to define a transformation on a part of a graph
 and then iterate said transformation across all the subgraphs. This library
 utilizes Graphs.jl to construct graphs and MetaGraphs.jl to store spin metadata
