@@ -1,3 +1,20 @@
+"""
+Main type for a diamond lattice. Takes four fields
+    - `generation`: The order or generation of the lattice.
+    - `initial_state`: The initial state of the lattice at time of creation.
+    - `final_state`: Final state of the lattice after MCMC simulation.
+    - `interaction_weight`: Strength of the bonds of the lattice.
+
+No type restrictions are imposed on the fields (expect to be changed). There are
+two external constructors.
+    - `DiamondLattice(G::MetaGraph, o::Integer)`: Construct a diamond lattice
+    with initiial and final states `G` and `o`. The strength of the lattice will
+    be `G.defaultweight`. Note: this will create a deepcopy of `G`.
+    - `DiamondLattice(G::MetaGraph, o::Integer, latticeweight::Number)`: 
+    Construct a diamond lattice with initiial and final states `G` and `o`. The
+    strength of the lattice will be `latticeweight`. Note: this will create a
+    deepcopy of `G`.
+"""
 mutable struct DiamondLattice
     generation
     initial_state
@@ -9,7 +26,16 @@ DiamondLattice(G::MetaGraph, order::Integer) = DiamondLattice(order, deepcopy(G)
 DiamondLattice(G::MetaGraph, order::Integer, latticeweight::Number) = DiamondLattice(order, deepcopy(G), deepcopy(G), latticeweight)
 
 """
-    Takes a lattice graph and an edge and applies b = 2 diamond transform
+Takes a lattice graph and an edge and applies b = 2 diamond transform. Thus
+function will also calculate the physical locations of the new spins with
+respect to locations of the old one, and thus should only be used for visual
+demonstration purposes. It is, otherwise, quite memory inefficient. Inputs for
+the function are:
+    - lattice: The `MetaGraph` to apply the transformation to.
+    - edge: The edge to apply the transformation to.
+    - scale (default = 1): How much to scale the locations of the new bonds by.
+    A scale of 1 indicates that the distance between the new bond and `edge`
+    should be equal to the length of `edge`.
 """
 function diamond_order_zero_transform!(lattice, edge; scale = 1)
     
@@ -37,7 +63,8 @@ function diamond_order_zero_transform!(lattice, edge; scale = 1)
 end
 
 """
-    Creates an order 0, b = 2 diamond lattice
+Creates an order 0, b = 2 diamond lattice with spin values set to `false`
+and locations of the spins at `1im` and `-1im`. Returns a MetaGraph.
 """
 function make_diamond_lattice0()
     order_zero = SimpleDiGraph(2, 1) |> MetaGraph
@@ -54,7 +81,10 @@ function make_diamond_lattice0()
 end
 
 """
-    Generates an arbitrary order diamond lattice
+Generates an arbitrary order diamond lattice with b = 2. Thus function will
+calculate the location of every spin. The location of every new spin will be
+scaled by $0.5^o$ where $o$ is the order of the spin. Inputs:
+    - order::Integer: Order of the lattice to generate
 """
 function diamond_lattice(order::Integer)
     oz = make_diamond_lattice0()
@@ -69,8 +99,12 @@ function diamond_lattice(order::Integer)
 end
 
 """
-    Generates an arbitrary order diamond Ising lattice given an initial state
-    where the initial state can be :zero or :infty
+Generates an arbitrary order diamond Ising lattice given an initial state
+where the initial state can be :zero or :infty. This method will calculate the
+location of every spin as well for plotting. Inputs:
+    - `order::Integer`: Order of lattice to generate.
+    - `state::Symbol`: Can either be `:zero` for all spins pointing up (+1) or
+    `:infty` for all spins pointing randomly.
 """
 function diamond_ising_lattice(order::Integer, state::Symbol)
     l = diamond_lattice(order)
@@ -87,7 +121,11 @@ function diamond_ising_lattice(order::Integer, state::Symbol)
 end
 
 """
-    Takes a lattice graph and an edge and applies diamond transform
+Takes a lattice graph and an edge and applies diamond transform. This will apply
+the diamond transform with arbitrary `b`. Inputs:
+    - `lattice`: `MetaGraph` lattice to apply the transformation to.
+    - `edge`: Edge to apply the transformation to.
+    - `b`: Number of new branches created.
 """
 function transform_edge_diamond!(lattice, edge, b)
     
@@ -102,7 +140,8 @@ function transform_edge_diamond!(lattice, edge, b)
 end
 
 """
-    Creates an order 0 diamond lattice
+Creates an order 0 diamond lattice. Does not calculate the location of the
+spins.
 """
 function order_zero_diamond_lattice()
     order_zero = SimpleGraph(2, 1) |> MetaGraph
@@ -110,9 +149,19 @@ function order_zero_diamond_lattice()
 end
 
 """
-    Raise order of diamond lattice
+Raise order of diamond lattice. This will apply `transform_edge_diamond!` to all
+edges of the lattice, given a `b`. Inputs:
+    - `lattice`: `MetaGraph` to apply the transformation to.
+    - `b`: Number of new branches created for every edge.
+    - `showprogress` (default `false`): Add a progress bar.
+    - `gc_freq` (default `0.01`): Since the function iterates over every edge
+    and adds new nodes with temporary variables at each iteration, for larger
+    lattices this parameter can be helpful to keep memory usage down. Setting
+    this to anything above `0` disables multithreading. At every iteration, run
+    the garbage collector with the probability `gc_freq`. Any value above `1`
+    will indicate running this at every iteration.
 """
-function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.2)
+function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.01)
     elist = collect(edges(lattice))
     P = Progress(length(elist), enabled = showprogress)
     for e in elist
@@ -123,7 +172,17 @@ function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.2)
 end
 
 """
-    Generates an arbitrary order diamond lattice
+Generates an arbitrary order diamond lattice. This function does not calculate
+physical locations of every new point. Inputs:
+    - `order::Int64`: Order of the lattice to create.
+    - `b::Int64`: Branching number of the lattice.
+    - `showprogress` (default `false`): Add a progress bar. 
+    - `gc_freq` (default `0.`): Since the function iterates over every edge
+    and adds new nodes with temporary variables at each iteration, for larger
+    lattices this parameter can be helpful to keep memory usage down. Setting
+    this to anything above `0` disables multithreading. At every iteration, run
+    the garbage collector with the probability `gc_freq`. Any value above `1`
+    will indicate running this at every iteration.
 """
 function diamond_lattice(order::Int64, b::Int64; showprogress = false, gc_freq = 0.)
     oz = order_zero_diamond_lattice()
@@ -135,11 +194,21 @@ function diamond_lattice(order::Int64, b::Int64; showprogress = false, gc_freq =
 end
 
 """
-    Generates an arbitrary order diamond Ising lattice given an initial state
-    where the initial state can be :zero or :infty
+Generates an arbitrary order diamond Ising lattice given an initial state
+where the initial state can be :zero or :infty. This function does not calculate
+the location of every spin. Inputs:
+    - `order::Int64`: Order of the lattice to generate.
+    - `b::Int64`: Branching number of the lattice.
+    - `showprogress` (default `false`): Add a progress bar. 
+    - `gc_freq` (default `0.`): Since the function iterates over every edge
+    and adds new nodes with temporary variables at each iteration, for larger
+    lattices this parameter can be helpful to keep memory usage down. Setting
+    this to anything above `0` disables multithreading. At every iteration, run
+    the garbage collector with the probability `gc_freq`. Any value above `1`
+    will indicate running this at every iteration.
 """
-function diamond_ising_lattice(order::Int64, b::Int64, state::Symbol)
-    l = diamond_lattice(order, b)
+function diamond_ising_lattice(order::Int64, b::Int64, state::Symbol; showprogress = false, gc_freq = 0.)
+    l = diamond_lattice(order, b, showprogress = showprogress, gc_freq = gc_freq)
     states = [+1, -1]
     if state == :zero
         for v in vertices(l)
