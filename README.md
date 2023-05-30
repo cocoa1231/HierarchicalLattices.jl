@@ -1,5 +1,7 @@
 # HierarchicalLattices.jl
 
+ [![docs - Stable](https://img.shields.io/badge/docs-Stable-2ea44f?logo=docs-stable-img)](https://cocoa1231.github.io/HierarchicalLattices.jl)
+
 This library provides several functions to generate hierarchical lattices
 [(Griffiths,
 Kaufman)](<https://journals.aps.org/prb/abstract/10.1103/PhysRevB.26.5022>).
