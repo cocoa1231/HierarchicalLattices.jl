@@ -154,7 +154,7 @@ function order_zero_diamond_lattice()
     return order_zero
 end
 
-"""
+@doc raw"""
 Raise order of diamond lattice. This will apply `transform_edge_diamond!` to all
 edges of the lattice, given a `b`. Inputs:
 
@@ -178,7 +178,7 @@ function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.01)
     end
 end
 
-"""
+@doc raw"""
 Generates an arbitrary order diamond lattice. This function does not calculate
 physical locations of every new point. Inputs:
 
@@ -201,7 +201,7 @@ function diamond_lattice(order::Int64, b::Int64; showprogress = false, gc_freq =
     return oz
 end
 
-"""
+@doc raw"""
 Generates an arbitrary order diamond Ising lattice given an initial state
 where the initial state can be :zero or :infty. This function does not calculate
 the location of every spin. Inputs:
