@@ -1,3 +1,14 @@
+"""
+Main type used by the `metropolis!` function. The fields are:
+
+- `lattice`: Lattice to evolve.
+- `magnetization_history::Vector{Float64}`: Every index `i` corresponds to the
+  magnetization at the state `i`.
+- `internalenergy_history::Vector{Float64}`: Every index `i` corresponds to the
+  internal energy at the state `i`.
+- `spinflip_history::Vector`:  Every index `i` corresponds to the spin flipped
+  in the previous Metropolis step `i-1`.
+"""
 mutable struct IsingData
     lattice
     magnetization_history::Vector{Float64}
@@ -7,6 +18,15 @@ end
 
 IsingData(D::DiamondLattice) = IsingData(D, Float64[], Float64[], Int64[])
 
+"""
+Evolves the system the given number of steps.
+
+- `data::IsingData`: Lattice to evolve.
+- `steps::Integer`: Number of steps to evolve the system for.
+- `T::Float64`: Temperature at which to evolve the system.
+- `showprogress` (default `false`): Add a progress bar.
+- `progressoutput` (default `stdout`): Write the progress bar output to this IO.
+"""
 function metropolis!(data::IsingData, steps::Integer, T::Float64; showprogress = false, progressoutput = stdout)
     metropolis!(data.lattice, data, steps, T; showprogress = showprogress, progressoutput = progressoutput)
 end
@@ -93,8 +113,14 @@ function metropolis!(::StackedDiamondLattice, data::IsingData, steps::Integer, T
 end
 
 """
-    Fill the internal energy or magnetization history of a lattice evolved using the
-    `HierarchicalLattices.metropolis!` function.
+Fill the internal energy or magnetization history of a lattice evolved using the
+`metropolis!` function. Inputs:
+
+- `data::IsingData`: Lattice to fill data for.
+- `variable::Symbol`: Which variable to fill. Possible values are `:U` for
+  internal energy and `:M` for magnetization.
+- `showprogress` (default `false`): Add a progress bar.
+- `progressoutput` (default `stdout`): Write the progress bar output to this IO.
 """
 function fill_data!(data::IsingData, variable::Symbol; showprogress = false, progressoutput = stdout)
     if variable == :M

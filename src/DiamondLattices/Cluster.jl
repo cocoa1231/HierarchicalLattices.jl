@@ -1,6 +1,18 @@
 using Dictionaries
 import Base:@kwdef
 
+"""
+Main type used by the `wolff!` function. Fields:
+
+- `lattice::T`: Lattice to evolve using the Wolff algorithm.
+- `magnetization_history::Vector{Float64}`: Every index `i` corresponds to the
+  magnetization of the system at the wolff step `i*saveinterval`.
+- `internalenergy_history::Vector{Float64}`: Every index `i` corresponds to the
+  internal energy of the system at the wolff step `i*saveinterval`.
+- `saveinterval::Int64`: Save the state of the system after this many steps.
+- `thermalization_steps::Int64`: Steps the system for this many steps before 
+  starting data collection.
+"""
 @kwdef mutable struct WolffData{T}
     lattice::T
     magnetization_history::Vector{Float64}
@@ -9,6 +21,15 @@ import Base:@kwdef
     thermalization_steps::Int64
 end
 
+"""
+Step the system for one step of the Wolff algorithm. Inputs:
+
+- `lattice::DiamondLattice`: Lattice to evolve. This function is specialized for
+  the diamond lattice.
+- `P_add::Float64`: Probability of adding the a spin to the cluster.
+- `adjacentmap::Dictionary{Int64, Vector{Int64}}`: Adjacency map of the system.
+  Will be changed to use the adjacency matrix.
+"""
 function wolffstep!(lattice::DiamondLattice, P_add::Float64, adjacentmap::Dictionary{Int64, Vector{Int64}})
     state = lattice.final_state
     viter = vertices(state)
@@ -44,6 +65,16 @@ function wolffstep!(lattice::DiamondLattice, P_add::Float64, adjacentmap::Dictio
     return cluster
 end
 
+"""
+Step the system for one step of the Wolff algorithm. Inputs:
+
+- `lattice::StackedDiamondLattice`: Lattice to evolve. This function is specialized for
+  the stacked diamond lattice.
+- `probdict::Dictionary{Float64, Float64}`: Probability of adding the a spin to
+  the cluster. Maps the bond (or edge) strength to the probability.
+- `adjacentmap::Dictionary{Int64, Vector{Int64}}`: Adjacency map of the system.
+  Will be changed to use the adjacency matrix.
+"""
 function wolffstep!(lattice::StackedDiamondLattice, probdict::Dictionary{Float64, Float64}, 
         adjacentmap::Dictionary{Int64, Vector{Int64}})
 
@@ -82,6 +113,17 @@ function wolffstep!(lattice::StackedDiamondLattice, probdict::Dictionary{Float64
     return cluster, spinsflipped
 end
 
+"""
+Run the Wolff algorithm for a given number of steps at a temperature. Inputs:
+
+- `WD::WolffData{L}` `WolffData` with lattice type `L`.
+- `nsteps`: Number of steps to evolve the system for.
+- `T`: Temperature at which to evolve the system.
+- `showprogress` (default `false`): Add a progress bar.
+- `verbose` (default `false`): Look at the argument name.
+- `progressoutput` (default `stdout`): Write the progress output to the given
+  IO.
+"""
 function wolff!(WD::WolffData{L}, nsteps, T; showprogress = false, verbose = false, progressoutput = stdout) where L
     β = 1/T
 

@@ -1,5 +1,24 @@
 import Base:in
 
+"""
+Represents a stacked diamond lattice with anisotropic bond strength in the
+stacking and "spacial" direction. Fields:
+
+- `generation`: Lattice generation in the spacial direction.
+- `stackingweight`: Bond strength in the stacking direction.
+- `initial_state`: Initial state at the time of construction.
+- `final_state`: Final state after MCMC evolution.
+- `edgeweightmap`: Maps vertex index to a dictionary mapping the edge weight to
+  neighbouring spins.
+
+Apart from the inner constructor, this type also has an outer constructor.
+
+- `StackedDiamondLattice(order, depth, stackingweight, initstate)` - Create a
+  stacked diamond lattice with spacial part made of diamond lattice with the given
+  order, depth and stacking weight. Additionally, each spacial lattice in the
+  spacial direction will have an initial state `initstate` which can be `:zero` or
+  `:infty`.
+"""
 mutable struct StackedDiamondLattice
     generation
     stackingweight
