@@ -168,7 +168,7 @@ edges of the lattice, given a `b`. Inputs:
   the garbage collector with the probability `gc_freq`. Any value above `1`
   will indicate running this at every iteration.
 """
-function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.01)
+function raise_order_diamond!(lattice, b; showprogress = false, gc_freq = 0.)
     elist = collect(edges(lattice))
     P = Progress(length(elist), enabled = showprogress)
     for e in elist
